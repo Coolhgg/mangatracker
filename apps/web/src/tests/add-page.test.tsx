@@ -7,6 +7,6 @@ describe("AddPage", () => {
     render(<AddPage />);
     expect(screen.getByText(/Add series/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/mangadex/i)).toBeInTheDocument();
-    expect(screen.getByText(/Search/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Search/i })).toBeInTheDocument();
   });
 });

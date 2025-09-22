@@ -5,16 +5,17 @@ import { getBrowserSupabase } from "@/lib/supabase/client";
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const supabase = getBrowserSupabase();
 
   const signInMagic = async () => {
     setMessage(null);
+    const supabase = getBrowserSupabase();
     const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/` } });
     if (error) setMessage(error.message); else setMessage("Check your email for the magic link.");
   };
 
   const signInGitHub = async () => {
     setMessage(null);
+    const supabase = getBrowserSupabase();
     const { error } = await supabase.auth.signInWithOAuth({ provider: "github", options: { redirectTo: `${window.location.origin}/` } });
     if (error) setMessage(error.message);
   };

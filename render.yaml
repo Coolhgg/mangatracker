@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: mangatracker-worker
+    env: node
+    plan: free
+    repo: https://github.com/Coolhgg/mangatracker
+    branch: main
+    rootDir: apps/worker
+    buildCommand: npm ci && npx prisma generate --schema packages/db/prisma/schema.prisma && npm run build -w @mangatracker/worker
+    startCommand: npm run start -w @mangatracker/worker
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: MANGADEX_BASE_URL
+        value: https://api.mangadex.org
+      - key: SYNC_INTERVAL_CRON
+        value: "*/15 * * * *"
