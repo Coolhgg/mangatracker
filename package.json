@@ -1,5 +1,23 @@
 {
-  "name": "mangatracker-monorepo-placeholder",
+  "name": "mangatracker",
   "version": "0.1.0",
-  "private": true
+  "private": true,
+  "packageManager": "npm@10.5.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "prisma:generate": "turbo run prisma:generate"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "turbo": "^2.2.3",
+    "typescript": "^5.6.2"
+  }
 }
