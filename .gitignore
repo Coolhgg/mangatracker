@@ -1,0 +1,23 @@
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Turbo / Next / Build
+.turbo
+.next
+out
+build
+dist
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
+coverage
+.vercel

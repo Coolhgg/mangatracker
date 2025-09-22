@@ -1,0 +1,24 @@
+{
+  "name": "@mangatracker/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "files": ["dist", "prisma/schema.prisma"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rimraf dist",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev --create-only",
+    "prisma:migrate:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.1"
+  },
+  "devDependencies": {
+    "prisma": "^5.19.1",
+    "typescript": "^5.6.2",
+    "rimraf": "^6.0.1"
+  }
+}
