@@ -18,7 +18,7 @@ export default async function Home() {
         <Link href="/add" className="rounded bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">Add series</Link>
       </div>
       {tracked.length === 0 ? (
-        <p className="text-gray-500">No series yet. Click "Add series" to start tracking.</p>
+        <p className="text-gray-500">No series yet. Click &quot;Add series&quot; to start tracking.</p>
       ) : (
         <ul className="divide-y divide-gray-200 dark:divide-gray-800">
           {tracked.map((t) => (
