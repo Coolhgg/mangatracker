@@ -1,4 +1,4 @@
-import Hero from '@/components/sections/Hero';
+import Hero from '../src/components/sections/Hero';
 export default function Page() {
   return <Hero />;
 }
