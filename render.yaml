@@ -2,12 +2,12 @@ services:
   - type: web
     name: mangatracker-worker
     env: node
-    plan: free
+    plan: starter
     repo: https://github.com/Coolhgg/mangatracker
     branch: main
     rootDir: apps/worker
-    buildCommand: npm ci && npx prisma generate --schema packages/db/prisma/schema.prisma && npm run build -w @mangatracker/worker
-    startCommand: npm run start -w @mangatracker/worker
+    buildCommand: cd ../.. && npm ci && npx prisma generate --schema packages/db/prisma/schema.prisma && npm run build -w @mangatracker/worker
+    startCommand: cd ../.. && npm run start -w @mangatracker/worker
     autoDeploy: true
     healthCheckPath: /
     envVars:
@@ -19,3 +19,5 @@ services:
         value: https://api.mangadex.org
       - key: SYNC_INTERVAL_CRON
         value: "*/15 * * * *"
+      - key: NODE_VERSION
+        value: "20"
