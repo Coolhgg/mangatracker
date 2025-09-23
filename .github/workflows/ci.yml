@@ -2,17 +2,41 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["main", "capy/**"]
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mangatracker
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mangatracker?schema=public
+      REDIS_URL: redis://localhost:6379
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon"
+      SUPABASE_SERVICE_ROLE: "service"
+      MANGADEX_BASE_URL: https://api.mangadex.org
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-          cache: 'npm'
+          node-version: 20
+          cache: npm
       - run: npm ci
-      - run: npx turbo run typecheck lint build
+      - name: Prisma generate (db package)
+        run: npx prisma generate --schema packages/db/prisma/schema.prisma
+      - name: Prisma migrate (create-only for initial)
+        run: npx prisma migrate dev --create-only --name init --schema packages/db/prisma/schema.prisma
+      - run: npx turbo run typecheck lint test build

@@ -1,33 +1,23 @@
 # Node
-node_modules/
+node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json.*
+pnpm-debug.log*
 
-# Turbo
-.turbo/
+# Turbo / Next / Build
+.turbo
+.next
+out
+build
+dist
 
-# Next.js
-.next/
-out/
-
-# Builds
-build/
-dist/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# IDEs
-.idea/
-.vscode/*
-!.vscode/settings.json
-
-# Coverage
-coverage/
-
-# Env files
+# Env
 .env
 .env.*
+!.env.example
+
+# Misc
+.DS_Store
+coverage
+.vercel

@@ -1,80 +1,72 @@
-# mangatracker
+# MangaTracker
 
-Production-ready monorepo scaffold using Turborepo + npm workspaces. Phase 0 focuses on structure, strict TypeScript, CI, and repo health — no runtime env vars.
+Monorepo for MangaTracker MVP.
 
-## What's included
+Repo structure
+- apps/web: Next.js 14 App Router web app (Supabase auth, minimal UI, API routes)
+- apps/worker: BullMQ worker that syncs from MangaDex
+- packages/db: Prisma schema and client shared across apps
 
-- Turborepo monorepo with npm workspaces
-- apps/web: Next.js 14 (App Router) + Tailwind + strict TS
-- apps/worker: TypeScript placeholder for future worker cluster
-- Strict base `tsconfig` inherited across packages
-- Prettier, ESLint (Next core-web-vitals for web), Husky + lint-staged
-- GitHub Actions CI (Node 20, npm): typecheck, lint, build
-- MIT License, Code of Conduct, Contributing guide, CODEOWNERS
+Getting started (local)
+1. Copy envs
+   cp .env.example .env
+2. Start Postgres + Redis
+   docker compose up -d
+3. Install deps
+   npm ci
+4. Generate Prisma Client
+   npx prisma generate --workspace=packages/db
+5. Create initial migration (create-only)
+   npx prisma migrate dev --create-only --name init --schema packages/db/prisma/schema.prisma
+6. Run dev
+   npm run dev
+   - Web: http://localhost:3000
+   - Worker: run separately in another terminal: npm run --workspace=@mangatracker/worker dev
 
-## Directory structure
+Environment variables
+- DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mangatracker?schema=public
+- REDIS_URL: redis://localhost:6379
+- NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY: from your Supabase project
+- SUPABASE_SERVICE_ROLE: used by worker if needed in the future
+- MANGADEX_BASE_URL: https://api.mangadex.org
+- SYNC_INTERVAL_CRON: CRON pattern for repeat jobs (default */15 * * * *)
 
-```
-/
-├─ apps/
-│  ├─ web/            # Next.js App Router + Tailwind
-│  └─ worker/         # TS worker placeholder
-├─ .github/workflows/ # CI
-├─ .husky/            # Git hooks
-├─ turbo.json         # Turborepo pipeline
-├─ tsconfig.base.json # Strict TS settings
-├─ package.json       # npm workspaces + scripts
-└─ prettier.config.cjs
-```
+Web app
+- Auth: Supabase magic link + GitHub OAuth. All main pages under /(app) are protected and redirect to /signin when not authenticated.
+- Flows:
+  - Home: lists your tracked series
+  - Add: search MangaDex or paste URL/ID, track series (creates global Series and associates with your user), and enqueues immediate sync
+  - Series detail: shows metadata and chapters; mark read/unread; trigger manual sync
+- API routes:
+  - POST /api/series { url?: string; sourceId?: string }
+  - GET /api/search?q=...
+  - POST /api/series/[id]/sync
+  - POST /api/chapters/[id]/toggle-read
 
-## Quickstart
+Worker
+- Queue: "sync-series" (BullMQ)
+- On startup: registers repeatable jobs for each tracked series (every 15 minutes by default)
+- Processor: fetches MangaDex series + chapters, upserts into DB with basic rate limiting
+- Health: exposes http OK on PORT (default 3001)
 
-1. Install dependencies
+Testing
+- Web: Vitest + React Testing Library
+- Worker: unit tests for mappers
 
-```
-npm ci
-```
+CI
+- Node 20
+- Postgres and Redis services
+- Steps: npm ci → prisma generate → prisma migrate dev --create-only → turbo run typecheck lint test build
 
-2. Run dev (web app)
+Deployment
+- DB: Supabase Postgres. Run prisma migrate deploy against Supabase:
+  DATABASE_URL=... npx prisma migrate deploy --schema packages/db/prisma/schema.prisma
+- Web: Vercel
+  - Set envs: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, DATABASE_URL (if using server routes that access DB), REDIS_URL
+- Worker: Render (Node service)
+  - Set envs: DATABASE_URL, REDIS_URL, MANGADEX_BASE_URL, SYNC_INTERVAL_CRON
+  - Start command: node dist/index.js (build first)
 
-```
-# From repo root via Turbo tasks
-# or directly in the app
-npm run dev
-# or
-cd apps/web && npm run dev
-```
-
-3. Typecheck, lint, build (across all workspaces)
-
-```
-npm run typecheck
-npm run lint
-npm run build
-```
-
-## CI
-
-GitHub Actions runs on push to `main` and on Pull Requests:
-
-- Setup Node 20.x
-- `npm ci`
-- `npx turbo run typecheck lint build`
-
-## Phase 0 scope
-
-- Scaffolding only (structure, tooling, CI)
-- No runtime environment variables
-- Strict TS throughout
-
-## How to roll back
-
-If needed, revert the PR that introduced this scaffold:
-
-- Use GitHub's "Revert" on the PR, or
-- Locally: `git revert <merge_commit_sha>`
-
-## Notes
-
-- Package manager: npm (package-lock.json). No pnpm/yarn files.
-- Engines: Node >= 20.
+Notes
+- Strict TypeScript everywhere.
+- No secrets committed. Use .env and platform env managers.
